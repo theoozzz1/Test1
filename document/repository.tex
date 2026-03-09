@@ -1,0 +1,306 @@
+
+
+
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{courier}
+
+\setstretch{1.2}
+
+\title{Backend Repository Documentation}
+\author{}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document describes all backend repositories, focusing on:
+\begin{itemize}
+    \item Custom query methods
+    \item Entity relationships
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{BadgeRepository.java}
+
+\textbf{Entity:} Badge \\
+\textbf{Extends:} \texttt{JpaRepository<Badge, UUID>}
+
+\subsection*{Entity Relationships}
+This repository manages the \texttt{Badge} entity, which is associated with:
+\begin{itemize}
+    \item \texttt{UserAccount}
+    \item \texttt{Organisation}
+    \item \texttt{OrganisationBadge}
+
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{Optional<Badge> findByCode(String code)} \\
+    Retrieves a badge using its unique business identifier (\texttt{code}).
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{BundlePostingRepository.java}
+
+\textbf{Entity:} BundlePosting \\
+\textbf{Extends:} \texttt{JpaRepository<BundlePosting, UUID>}
+
+\subsection*{Entity Relationships}
+This repository manages the \texttt{BundlePosting} entity, which is associated with:
+\begin{itemize}
+    \item \texttt{Seller} (each bundle posting is created by a seller)
+    \item \texttt{Category} (each bundle posting belongs to a category)
+    \item \texttt{Reservation}
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{List<BundlePosting> findBySeller\_SellerId(UUID sellerId)} \\
+    Retrieves all bundle postings created by a seller.
+
+    \item \texttt{Page<BundlePosting> findAvailable(Instant now, Pageable pageable)} \\
+    Retrieves all active bundle postings that are not fully reserved and have not passed their pickup end time.
+
+    \item \texttt{List<BundlePosting> findExpired(Instant now)} \\
+    Retrieves all active bundle postings whose pickup end time has already passed.
+
+    \item \texttt{long countBySeller(UUID sellerId)} \\
+    Returns the total number of bundle postings created by a seller.
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{CategoryRepository.java}
+
+\textbf{Entity:} Category \\
+\textbf{Extends:} \texttt{JpaRepository<Category, UUID>}
+
+\subsection*{Entity Relationships}
+This repository manages the \texttt{Category} entity, which is associated with:
+\begin{itemize}
+    \item \texttt{BundlePosting}
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+This repository does not have custom query methods.
+
+\hrule
+\vspace{1em}
+
+
+
+\section{IssueReportRepository.java}
+
+\textbf{Entity:} IssueReport \\
+\textbf{Extends:} \texttt{JpaRepository<IssueReport, UUID>}
+
+\subsection*{Entity Relationships}
+Associated with:
+\begin{itemize}
+    \item \texttt{BundlePosting} (the bundle posting that the issue refers to)
+    \item \texttt{UserAccount} (the user who submitted the issue report)
+    \item \texttt{OrgOrder} (the reservation related to the issue)
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{List<IssueReport> findByOrganisationOrgId(UUID orgId)} \\
+    Retrieves all issue reports associated with a specific organisation.
+
+
+
+    
+    \item \texttt{List<IssueReport> findBySeller(UUID sellerId)} \\
+    Retrieves all issue reports associated with bundle postings owned by a seller.
+
+    \item \texttt{List<IssueReport> findOpenBySeller(UUID sellerId)} \\
+     Retrieves all opened issue reports for a specific seller
+
+
+    
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{OrganisationRepository.java}
+
+\textbf{Entity:} Organisation \\
+\textbf{Extends:} \texttt{JpaRepository<Organisation, UUID>}
+
+\subsection*{Entity Relationships}
+
+This repository manages Organisataion, which is associated with:
+
+\begin{itemize}
+    \item \texttt{UserAccount}
+\end{itemize}
+
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{Optional<Organisation> findByUserUserId(UUID userId)} \\ 
+  Retrieves the organisation associated with the specific UserAccount.
+
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{OrganisationBadgeRepository.java}
+
+\textbf{Entity:} OrganisationBadge \\
+\textbf{Extends:} \texttt{JpaRepositoryy<OrganisationBadge, OrganisationBadge.Key>}
+
+\subsection*{Entity Relationships}
+This repository manages the \texttt{OrganisationBadge} entity, representing a link between:
+\begin{itemize}
+    \item \texttt{Organisation}
+    \item \texttt{Badge}
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{List<OrganisationBadge> findByOrgId(UUID orgId)} \\
+  Retrieves all badge associations for a specific organisation.
+\end{itemize}
+
+
+
+\section{OrganisationStreakCacheRepository.java}
+
+\textbf{Entity:} OrganisationStreakCache \\
+\textbf{Extends:} \texttt{JpaRepository<OrganisationStreakCache, UUID>}
+
+\subsection*{Entity Relationships}
+This repository manages the \texttt{OrgOrder} entity, which is associated with:
+\begin{itemize}
+    \item \texttt{Organisation}
+\end{itemize}
+
+\subsection*{Custom Query Methods}
+This repository does not have custom query methods.
+
+\hrule
+\vspace{1em}
+
+\section{PickupWindowRepository.java}
+
+\textbf{Entity:} PickupWindow \\
+\textbf{Extends:} \texttt{JpaRepository<PickupWindow, UUID>}
+
+\subsection*{Entity Relationships}
+
+This repository manages the \texttt{Seller} entity, which is associated with:
+
+\begin{itemize}
+    \item \texttt{BundlePosting}
+\end{itemize}
+
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{Optional<PickupWindow> findByLabel(String label)} \\
+Retrieves a pickup window using its label. 
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+
+\section{ReservationRepository.java}
+
+\textbf{Entity:} Reservation \\
+\textbf{Extends:} \texttt{JpaRepository<Reservation, UUID>}
+
+\subsection*{Entity Relationships}
+
+This repository manages the \texttt{Seller} entity, which is associated with:
+
+\begin{itemize}
+    \item \texttt{BundlePosting}
+    \item \texttt{Organisation}
+    \item \texttt{Seller}
+\end{itemize}
+
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{List<Reservation> findByOrganisationOrgId(UUID orgId)} \\
+Retrieves all reservations made by a specific organisation.
+    \item \texttt{List<Reservation> findByPostingSellerSellerId(UUID sellerId))} \\
+ Retrieves all reservations related to bundle postings owned by a specific seller.    \item \texttt{List<Reservation> findByPostingSellerSellerIdAndStatus(UUID sellerId, Reservation.Status status)} \\
+Retrieves reservations for a specific seller based on reservation status.  
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+
+\section{SellerRepository.java}
+
+\textbf{Entity:} Seller \\
+\textbf{Extends:} \texttt{JpaRepository<Seller, UUID>}
+
+\subsection*{Entity Relationships}
+
+This repository manages the \texttt{Seller} entity, which is associated with:
+
+\begin{itemize}
+    \item \texttt{UserAccount}
+    \item \texttt{Reservation}
+\end{itemize}
+
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{Optional<Seller> findByUser\_UserId(UUID userId)} \\
+    Retrieves the seller entity associated with an user account.
+
+\end{itemize}
+
+\hrule
+\vspace{1em}
+
+\section{UserAccountRepository.java}
+
+\textbf{Entity:} UserAccount \\
+\textbf{Extends:} \texttt{JpaRepository<UserAccount, UUID>}
+
+\subsection*{Entity Relationships}
+
+This repository manages the \texttt{UserAccount} entity, which is associated with:
+
+\begin{itemize}
+    \item \texttt{Seller}
+    \item \texttt{IssueReport}
+\end{itemize}
+
+
+\subsection*{Custom Query Methods}
+\begin{itemize}
+    \item \texttt{Optional<UserAccount> findByEmail(String email)} \\
+    Retrieves a user account using its email address
+
+
+    \item \texttt{boolean existsByEmail(String email)} \\
+    Check if a user account for a given email address already exists.
+
+
+\end{itemize}
+
+\end{document}

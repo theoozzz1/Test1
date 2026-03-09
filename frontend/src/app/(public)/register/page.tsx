@@ -1,0 +1,190 @@
+"use client";
+
+import { useAuth } from "@/store/auth.store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+
+function emailCheck(email: string) {
+  const atSplit = email.split("@");
+  if (atSplit.length !== 2) return false;
+  const dotSplit = atSplit[1].split(".");
+  if (dotSplit.length < 2) return false;
+  return true;
+}
+
+export default function RegisterPage() {
+  const router = useRouter();
+  const { user, register, init } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSeller, setIsSeller] = useState(false);
+  const [TCs,setTCs] = useState(false);
+  const [location, setLocation] = useState("");
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    init();
+  }, [init]);
+
+  useEffect(() => {
+    if (user) {
+      router.push(user.role === "SELLER" ? "/dashboard" : "/home");
+    }
+  }, [user, router]);
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if(!TCs){
+      setError("You must accept our terms and conditions.");
+      return;
+    }
+
+    if (!name || !email || !password) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (!emailCheck(email)) {
+      setError("Invalid email format.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await register(
+        email,
+        password,
+        isSeller ? "SELLER" : "ORG_ADMIN",
+        name,
+        location || undefined
+      );
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Sign up failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="auth-page">
+      <div className="auth-container">
+        <div className="auth-header">
+          <div className="auth-logo">BM</div>
+          <h1 className="auth-title">Create an account</h1>
+          <p className="auth-subtitle">
+            Join Byte Me and start reducing food waste
+          </p>
+        </div>
+
+        <form onSubmit={handleRegister} className="card">
+          {error && <div className="alert alert-error" role="alert">{error}</div>}
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="reg-name" className="label">Business Name</label>
+              <input
+                id="reg-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="input"
+                placeholder="Your business or organization name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="reg-email" className="label">Email</label>
+              <input
+                id="reg-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input"
+                placeholder="john@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="reg-password" className="label">Password</label>
+              <input
+                id="reg-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input"
+                placeholder="Minimum 6 characters"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="reg-location" className="label">Location (optional)</label>
+              <input
+                id="reg-location"
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="input"
+                placeholder="Your city or address"
+              />
+            </div>
+
+            <label htmlFor="reg-seller" className="checkbox-label">
+              <input
+                id="reg-seller"
+                type="checkbox"
+                checked={isSeller}
+                onChange={(e) => setIsSeller(e.target.checked)}
+                className="checkbox"
+              />
+              <span>I am a seller</span>
+            </label>
+
+            <label htmlFor="reg-tcs" className="checkbox-label">
+              <input
+                id="reg-tcs"
+                type="checkbox"
+                checked={TCs}
+                onChange={(e) => setTCs(e.target.checked)}
+                className="checkbox"
+              />
+
+              <span>
+                By checking this box you agree to our{" "}
+                <Link href="/terms" className="link underline">
+                  terms and conditions
+                </Link>.
+              </span>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full mt-6"
+          >
+            {loading ? "Creating account..." : "Create Account"}
+          </button>
+
+          <p className="auth-footer">
+            Already have an account?{" "}
+            <Link href="/login" className="link">
+              Log in
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
+}

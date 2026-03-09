@@ -1,0 +1,374 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\geometry{margin=1in}
+
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+\title{Backend Entity Documentation}
+\date{}
+
+\begin{document}
+\maketitle
+\hrule
+\vspace{1em}
+
+% -------------------------------------------------
+
+\section*{Overview}
+
+\begin{enumerate}
+    \item This document describes the core entities used in the system, including:
+    \begin{itemize}
+        \item \texttt{Badge.java}
+        \item \texttt{BundlePosting.java}
+        \item \texttt{Category.java}
+        \item \texttt{IssueReport.java}
+        \item \texttt{Organisation.java}
+        \item \texttt{OrganisationBadge.java}
+        \item \texttt{OrganisationStreakCache.java}
+        \item \texttt{PickupWindow.java}
+        \item \texttt{Reservation.java}
+        \item \texttt{Seller.java}
+        \item \texttt{UserAccount.java}
+    \end{itemize}
+\end{enumerate}
+
+
+
+
+% -------------------------------------------------
+\section{Badge.java}
+
+\textbf{Table:} \texttt{badge} \\
+\textbf{Purpose:} Defines gamification badges
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{badge\_id} & \texttt{UUID} & Primary key \\
+\texttt{code} & \texttt{String} &  \\
+\texttt{name} & \texttt{String} &  \\
+\texttt{description} & \texttt{String} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item Badge $\rightarrow$ Organisation (One-to-Many)
+\end{itemize}
+
+% -------------------------------------------------
+\section{BundlePosting.java}
+
+\textbf{Table:} \texttt{bundlePosting} \\
+\textbf{Purpose:} Represents a food bundle information 
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{posting\_id} & \texttt{UUID} & Primary key \\
+\texttt{seller\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{Seller} \\
+\texttt{category\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{Category} \\
+\texttt{window\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{PickupWindow} \\
+
+\texttt{title} & \texttt{String} &  \\
+\texttt{description} & \texttt{String} &  \\
+\texttt{allergensText} & \texttt{String} &  \\
+\texttt{pickupStartAt} & \texttt{Instant} &  \\
+\texttt{pickupEndAt} & \texttt{Instant} &  \\
+\texttt{quantityTotal} & \texttt{Integer} &  \\
+\texttt{quantityReserved} & \texttt{Integer} &  \\
+\texttt{priceCents} & \texttt{Integer} &  \\
+\texttt{discountPct} & \texttt{Integer} &  \\
+\texttt{estimatedWeightGrams} & \texttt{Integer} &  \\
+\texttt{status} & \texttt{ENUM} &  \\
+\texttt{created\_at} & \texttt{Instant} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item BundlePosting $\rightarrow$ Seller (Many-to-One)
+  \item BundlePosting $\rightarrow$ Category (Many-to-One)
+  \item BundlePosting $\rightarrow$ PickupWindow (Many-to-One)
+  \item BundlePosting $\rightarrow$ Reservation (One-to-Many)
+
+  
+\end{itemize}
+
+% -------------------------------------------------
+\section{Category.java}
+
+\textbf{Table:} \texttt{category} \\
+\textbf{Purpose:} Bundle category
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{category\_id} & \texttt{UUID} & Primary key \\
+\texttt{name} & \texttt{String} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item Category $\rightarrow$ BundlePosting (One-to-Many)
+\end{itemize}
+
+
+
+% -------------------------------------------------
+\section{IssueReport.java}
+
+\textbf{Table:} \texttt{issueReport} \\
+\textbf{Purpose:} Stores issue reports and responses \\
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{issue\_id} & \texttt{UUID} & Primary key \\
+\texttt{reservation\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{reservation} \\
+\texttt{org\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{organisation} \\
+\texttt{type} & \texttt{String} & \\
+\texttt{description} & \texttt{String} &  \\
+\texttt{status} & \texttt{ENUM} & \\
+\texttt{seller\_response} &  \texttt{String} & \\
+\texttt{created\_at} & \texttt{Instant} &  \\
+\texttt{resolved\_at} & \texttt{Instant} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item IssueReport $\rightarrow$ Reservation (Many-to-One)
+  \item IssueReport $\rightarrow$ Organisation (Many-to-One)
+\end{itemize}
+
+
+% -------------------------------------------------
+\section{Organisation.java}
+
+\textbf{Table:} \texttt{organisation} \\
+\textbf{Purpose:} Represents an organisation participating in the system
+
+
+
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{org\_id} & \texttt{UUID} & Primary key \\
+\texttt{user\_id} & \texttt{UUID} & @\texttt{OneToOne}, FK \texttt{UserAccount}\\
+\texttt{name} & \texttt{String} & \\
+\texttt{location\_text} & \texttt{String} &  \\
+\texttt{billing\_email} & \texttt{String} &  \\
+\texttt{created\_at} & \texttt{Instant} & \\
+\hline
+
+
+
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item Organisation $\rightarrow$ UserAccount (One-to-One)
+  \item Organisation $\rightarrow$ IssurReport (One-to-Many)
+
+
+\end{itemize}
+
+
+% -------------------------------------------------
+\section{OrganisationBadge.java}
+
+\textbf{Table:} \texttt{organisationBadge} \\
+\textbf{Purpose:} Many-to-many join between Organisation and Badge \\
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{org\_id} & \texttt{UUID} & Primary key, @\texttt{ManyToOne}, FK \texttt{organisation} \\
+\texttt{badge\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{badge} \\
+\texttt{organisation} & \texttt{Organisation} & \\
+\texttt{badge} & \texttt{Badge} &  \\
+\texttt{awarded\_at} & \texttt{Instant} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item OrganisationBadge $\rightarrow$ Organisation (Many-to-One)
+  \item OrganisationBadge $\rightarrow$ Badge (Many-to-One)
+\end{itemize}
+
+% -------------------------------------------------
+\section{OrganisationStreakCache.java}
+
+\textbf{Table:} \texttt{organisationStreakCache} \\
+\textbf{Purpose:} Caches organisation rescue streak statistics \\
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{org\_id} & \texttt{UUID} & Primary key, @\texttt{OneToOne}, FK \texttt{organisation} \\
+\texttt{current\_streak\_weeks} & \texttt{Integer} & \\
+\texttt{best\_streak\_weeks} & \texttt{Integer} & \\
+\texttt{last\_rescue\_week\_start} & \texttt{LocalDate} & \\
+\texttt{updated\_at} & \texttt{Instant} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item OrganisationStreakCache $\rightarrow$ Organisation (One-to-One)
+\end{itemize}
+
+% -------------------------------------------------
+\section{PickupWindow.java}
+
+\textbf{Table:} \texttt{pickupWindow} \\
+\textbf{Purpose:} Defines predefined pickup time windows for bundle collection \\
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{window\_id} & \texttt{UUID} & Primary key \\
+\texttt{label} & \texttt{String} &  \\
+\texttt{start\_time} & \texttt{LocalTime} &  \\
+\texttt{end\_time} & \texttt{LocalTime} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item PickupWindow $\rightarrow$ BundlePosting (One-to-Many)
+
+\end{itemize}
+
+
+% -------------------------------------------------
+
+\section{Reservation.java}
+
+\textbf{Table:} \texttt{reservation} \\
+\textbf{Purpose:} Represents a reservation made by an organisation  \\
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{reservation\_id} & \texttt{UUID} & Primary key \\
+\texttt{posting\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{bundle\_posting} \\
+\texttt{org\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{organisation} \\
+\texttt{reserved\_by\_user\_id} & \texttt{UUID} & @\texttt{ManyToOne}, FK \texttt{user\_account} \\
+\texttt{reserved\_at} & \texttt{Instant} & \\
+\texttt{status} & \texttt{ENUM} &  \\
+\texttt{claim\_code\_hash} & \texttt{String} &  \\
+\texttt{claim\_code\_last4} & \texttt{String} & \\
+\texttt{collected\_at} & \texttt{Instant} &  \\
+\texttt{no\_show\_marked\_at} & \texttt{Instant} & \\
+\texttt{expired\_marked\_at} & \texttt{Instant} & \\
+\texttt{cancelled\_at} & \texttt{Instant} &  \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item Reservation $\rightarrow$ BundlePosting (Many-to-One)
+  \item Reservation $\rightarrow$ Organisation (Many-to-One)
+  \item Reservation $\rightarrow$ UserAccount (Many-to-One)
+  \item Reservation $\rightarrow$ IssueReport (One-to-Many)
+
+\end{itemize}
+
+
+% -------------------------------------------------
+\section{Seller.java}
+
+\textbf{Table:} \texttt{seller} \\
+\textbf{Purpose:} Represents a seller account that lists food bundles
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{seller\_id} & \texttt{UUID} & Primary key \\
+\texttt{user\_id} & \texttt{UserAccount} & @\texttt{OneToOne}, FK \texttt{userAccount} \\
+\texttt{name} & \texttt{String} &  \\
+\texttt{location\_text} & \texttt{String} &  \\
+\texttt{openingHours\_text} & \texttt{String} &  \\
+\texttt{contact\_stub} & \texttt{String} &  \\
+\texttt{created\_at} & \texttt{Instant} & \\
+\hline
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item Seller $\rightarrow$ UserAccount (One-to-One)
+  \item Seller $\rightarrow$ BundlePosting (One-to-Many)
+\end{itemize}
+
+
+% -------------------------------------------------
+\section{UserAccount.java}
+
+\textbf{Table:} \texttt{userAccount} \\
+\textbf{Purpose:} Stores user account information
+
+
+
+\subsection*{Attributes}
+\begin{longtable}{|p{4cm}|p{3cm}|p{6cm}|}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\
+\hline
+\texttt{user\_id} & \texttt{UUID} & Primary key \\
+\texttt{email} & \texttt{String} &  \\
+\texttt{password\_hash} & \texttt{String} &  \\
+\texttt{role} & \texttt{String} &  \\
+\texttt{created\_at} & \texttt{Instant} &  \\
+\hline
+
+
+
+\end{longtable}
+
+\subsection*{Relationships}
+\begin{itemize}
+  \item UserAccount $\rightarrow$ Reservation (One-to-Many)
+  \item UserAccount $\rightarrow$ Seller (One-to-One)
+  \item UserAccount $\rightarrow$ Organisation (One-to-One)
+
+\end{itemize}
+
+
+\end{document}
+
